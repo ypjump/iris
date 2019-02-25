@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .shade{
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            background: black;
+            opacity: 0.6;
+            z-index: 100;
+        }
+        .add-modal{
+            position: fixed;
+            height: 300px;
+            width: 400px;
+            top: 100px;
+            left: 50%;
+            z-index: 101;
+            border: 1px solid red;
+            background: white;
+            margin-left: -200px;
+
+        }
+        .hide{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form >
+        <div>
+            <input id="sl" type="text" placeholder="花萼长度" name="sepal_length">
+            <input id="sw" type="text" placeholder="花萼宽度" name="sepal_width">
+            <input id="pl" type="text" placeholder="花瓣长度" name="petal_length">
+            <input id="pw" type="text" placeholder="花瓣宽度" name="petal_width">
+            <input type="button" value="查询" id="classify" >
+        </div>
+    </form>
+    <div><h3>查询结果</h3></div>
+    <ul>
+        {% for i in result_list %}
+            <li>花萼长度 {{ i.0 }} 花萼宽度{{ i.1 }} 花瓣长度{{ i.2 }} 花瓣宽度{{ i.3 }} | 结果{{ i.4 }}</li>
+        {% endfor %}
+    </ul>
+    <div class="shade hide"></div>
+    <div class="add-modal hide">
+        <h3 id="result"></h3>
+        <a href="/iris/" style="cursor:pointer; color:blue">确定</a>
+    </div>
+    <script src="/static/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function(){
+           $("#classify").click(function(){
+               var a=true;
+               $(this).siblings().each(function(){
+                   console.log(parseInt($(this).val()));
+                   if( $(this).val().length==0){
+                       a=false
+                   }else if(isNaN(parseInt($(this).val()))){
+                       a=false
+                   }
+                   });
+               if(a==true){
+                    $.ajax({
+                       url:"/ajax/",
+                       type:"POST",
+                       data:{
+                       "sl":$("#sl").val(),
+                       "sw":$("#sw").val(),
+                       "pl":$("#pl").val(),
+                       "pw":$("#pw").val()
+                       },
+                       success:function(data){
+                           var obj = JSON.parse(data);
+                           console.log(obj.status);
+                           if(obj.status){
+                               var res="结果为" + obj.res;
+                               $("#result").text(res)
+                           }else{$("#result").text(obj.error)}}
+                       });
+                    $(".shade,.add-modal").removeClass('hide');
+               }else{alert("输入为空或者不是数字！")}
+
+           });
+        })
+
+    </script>
+</body>
+</html>
